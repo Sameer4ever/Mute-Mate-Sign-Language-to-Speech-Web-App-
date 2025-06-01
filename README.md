@@ -4,6 +4,8 @@
 
 ---
 
+![Web app screenshot](Screenshot.png)
+
 ## 🚀 Features
 
 - 🔴 Real-time ISL gesture recognition using Mediapipe + LSTM
