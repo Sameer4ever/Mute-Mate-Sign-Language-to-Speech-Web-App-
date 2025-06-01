@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sign Sense - Sign Language Converter</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background: #f5f5f5;
+      font-family: "Arial", sans-serif;
+    }
+    .brand {
+      color: #1a73e8;
+      font-weight: bold;
+      font-size: 40px;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .community-badge {
+      display: inline-block;
+      padding: 5px 15px;
+      border-radius: 20px;
+      margin: 5px;
+      font-size: 0.9em;
+      cursor: pointer;
+    }
+    .blue-badge {
+      background: #1a73e8;
+      color: white;
+    }
+    .orange-badge {
+      background: #ff6d00;
+      color: white;
+    }
+    .card-img-top {
+      height: 150px;
+      object-fit: cover;
+    }
+  </style>
+  <script>
+    function fetchLatest() {
+      fetch("/get-latest")
+        .then((res) => res.text())
+        .then((text) => {
+          document.getElementById("liveOutput").innerText = text || "Waiting...";
+        });
+
+      fetch("/get-latest-hindi")
+        .then((res) => res.text())
+        .then((text) => {
+          document.getElementById("liveHindiOutput").innerText = text || "Waiting...";
+        });
+    }
+
+    setInterval(fetchLatest, 2000);
+
+    function speakSentence() {
+      fetch("/speak-sentence", { method: "POST" })
+        .then((response) => response.text())
+        .then((data) => alert(data))
+        .catch((error) => alert("Speech error: " + error));
+    }
+
+    function startTranslation() {
+      fetch("/start-detection", { method: "POST" })
+        .then((response) => response.text())
+        .then((data) => alert(data))
+        .catch((error) => alert("Start error: " + error));
+    }
+  </script>
+</head>
+<body>
+    <div class="container mt-4">
+     <!-- Centered full-width brand -->
+        <div class="brand text-center mb-1">MUTE MATE</div>
+        <p class="text-center text-muted" style="margin-top: -5px;">
+          "Bridging silence with technology — convert sign to speech."
+         </p>
+
+    <div class="row">
+      <!-- Left Side: Dashboard -->
+      <div class="col-md-8">
+        <!-- <div class="brand mb-1">MUTE MATE</div>
+        <p class="text-center text-muted" style="margin-top: -5px;">
+          "Bridging silence with technology — convert sign to speech."
+        </p> -->
+
+        <h3>Welcome Mate</h3>
+        <p class="text-muted">What would you like to do today?</p>
+
+        <div class="card mb-4">
+          <div class="card-body">
+            <!-- <h5 class="card-title">Quick suggestions:</h5> -->
+            <div class="d-flex flex-wrap">
+              <div
+                class="community-badge blue-badge btn"
+                onclick="startTranslation()"
+              >
+                Start Translation
+              </div>
+              <a
+                href="https://www.youtube.com/watch?v=5PF6JXzYyUI&list=PLFjydPMg4DapfRTBMokl09Ht-fhMOAYf6&pp=0gcJCV8EOCosWNin"
+                target="_blank"
+                class="community-badge orange-badge btn"
+                >Learn ISL</a
+              >
+              <a
+                href="https://indiansignlanguage.org/"
+                target="_blank"
+                class="community-badge orange-badge btn"
+                >ISL Dictionary</a
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <h5>🧠 Predicted Sentence (English):</h5>
+          <p id="liveOutput" class="text-primary">Waiting for prediction...</p>
+
+          <h5>🌐 Hindi Translation:</h5>
+          <p id="liveHindiOutput" class="text-success">Waiting for translation...</p>
+
+          <button class="btn btn-success mt-3" onclick="speakSentence()"
+            >🔊 Speak Sentence</button
+          >
+        </div>
+      </div>
+
+      <!-- Right Side: Knowledge Base of Crops -->
+      <div class="col-md-4 d-flex flex-column align-items-center">
+        <div class="w-100" style="margin-top: 60px;">
+          <h5 class="text-center mb-3">📚 Knowledge Base of Crops</h5>
+          <div class="row row-cols-1 g-3 w-100 px-2">
+            <div class="col">
+              <div class="card h-100 shadow-sm">
+                <a href="Wheat.jpg" target="_blank">
+                  <img
+                    src="Wheat1.jpg"
+                    class="card-img-top"
+                    style="height: 100px; object-fit: cover"
+                    alt="Wheat"
+                  />
+                </a>
+                <div class="card-body text-center p-2">
+                  <small class="card-title">Wheat</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="card h-100 shadow-sm">
+                <a href="Paddy.jpg" target="_blank">
+                  <img
+                    src="Paddy1.jpg"
+                    class="card-img-top"
+                    style="height: 100px; object-fit: cover"
+                    alt="Paddy"
+                  />
+                </a>
+                <div class="card-body text-center p-2">
+                  <small class="card-title">Paddy</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="card h-100 shadow-sm">
+                <a href="Maize.jpg" target="_blank">
+                  <img
+                    src="Maize1.jpg"
+                    class="card-img-top"
+                    style="height: 100px; object-fit: cover"
+                    alt="Maize"
+                  />
+                </a>
+                <div class="card-body text-center p-2">
+                  <small class="card-title">Maize</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="col">
+              <div class="card h-100 shadow-sm">
+                <a href="Barley.jpg" target="_blank">
+                  <img
+                    src="Barley1.jpg"
+                    class="card-img-top"
+                    style="height: 100px; object-fit: cover"
+                    alt="Barley"
+                  />
+                </a>
+                <div class="card-body text-center p-2">
+                  <small class="card-title">Barley</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

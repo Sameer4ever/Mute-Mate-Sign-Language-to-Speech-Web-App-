@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MUTE MATE - Sign Language Converter</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- Google Fonts: Poppins for a clean modern look -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* Root palette */
+      :root {
+        --primary-color: #4f46e5; /* Indigo-600 */
+        --primary-hover: #4338ca;
+        --accent-color: #f97316; /* Orange-500 */
+        --accent-hover: #ea580c;
+        --background-light: #f9fafb; /* Light Gray */
+        --text-primary: #111827; /* Gray-900 */
+        --text-secondary: #6b7280; /* Gray-500 */
+        --card-bg: #ffffff;
+        --badge-radius: 9999px;
+        --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      body {
+        background: var(--background-light);
+        font-family: "Poppins", Arial, sans-serif;
+        color: var(--text-primary);
+        min-height: 100vh;
+        margin: 0;
+        padding: 2rem 1rem;
+      }
+
+      .brand {
+        font-weight: 700;
+        font-size: 3rem;
+        color: var(--primary-color);
+        text-align: center;
+        margin-bottom: 0.2rem;
+        letter-spacing: 0.05em;
+        user-select: none;
+      }
+
+      .tagline {
+        color: var(--text-secondary);
+        font-size: 1.125rem;
+        text-align: center;
+        margin-top: 0.1rem;
+        margin-bottom: 3rem;
+        font-style: italic;
+        user-select: none;
+      }
+
+      h3 {
+        font-weight: 600;
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+        color: var(--primary-color);
+      }
+
+      p.text-muted {
+        color: var(--text-secondary);
+        font-size: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      /* Buttons */
+      .btn {
+        font-weight: 600;
+        border-radius: 24px;
+        padding: 0.5rem 1.5rem;
+        font-size: 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: var(--shadow-md);
+        border: none;
+        user-select: none;
+      }
+
+      .btn:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.5);
+      }
+
+      .blue-badge {
+        background-color: var(--primary-color);
+        color: #fff;
+      }
+      .blue-badge:hover {
+        background-color: var(--primary-hover);
+        box-shadow: 0 6px 15px rgba(79, 70, 229, 0.3);
+        cursor: pointer;
+      }
+
+      .orange-badge {
+        background-color: var(--accent-color);
+        color: #fff;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .orange-badge:hover {
+        background-color: var(--accent-hover);
+        box-shadow: 0 6px 15px rgba(249, 115, 22, 0.3);
+        cursor: pointer;
+        text-decoration: none;
+      }
+
+      /* Card styles */
+      .card {
+        background: var(--card-bg);
+        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: default;
+      }
+      .card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+      }
+
+      .card-img-top {
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+        height: 120px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+      .card:hover .card-img-top {
+        transform: scale(1.05);
+      }
+
+      .card-body {
+        padding: 1rem 1rem 1.25rem;
+      }
+
+      .card-title {
+        font-weight: 600;
+        font-size: 1rem;
+        color: var(--primary-color);
+        user-select: none;
+      }
+
+      /* Text sections */
+      #liveOutput {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--primary-color);
+        min-height: 40px;
+        user-select: text;
+      }
+
+      #liveHindiOutput {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--accent-color);
+        min-height: 40px;
+        user-select: text;
+      }
+
+      /* Layout tweaks */
+      .community-badge {
+        border-radius: var(--badge-radius);
+        padding: 0.6rem 1.4rem;
+        margin: 0.25rem 0.5rem 0.5rem 0;
+        display: inline-block;
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+        user-select: none;
+      }
+
+      .d-flex.flex-wrap {
+        gap: 0.5rem 1rem;
+      }
+
+      .text-center.mb-3 {
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+
+      /* Responsive tweaks */
+      @media (max-width: 767px) {
+        .brand {
+          font-size: 2.5rem;
+        }
+        h3 {
+          font-size: 1.5rem;
+        }
+        #liveOutput,
+        #liveHindiOutput {
+          font-size: 1.1rem;
+        }
+      }
+    </style>
+
+    <script>
+      let isHindi = false;
+
+      const replaceableWords = {
+        medicine: [
+          "Propiconazole",
+          "Propiconazole25IC",
+          "Mancojeb75WP",
+          "Fipronil5SC",
+          "Dimethate30IC",
+        ],
+        area: ["per hectare"],
+        quantity: [
+          "500ml",
+          "100ml",
+          "100kg",
+          "750Litre",
+          "500Litre",
+          "800Litre",
+          "100Litre",
+        ],
+        crop: ["Wheat", "Maize", "Paddy", "Barley"],
+        disease: [
+          "JhulsaRog",
+          "ValayPatti",
+          "PowderyMildew",
+          "TanaBhedak",
+          "DhaankaFudka",
+          "Chepa",
+        ],
+      };
+  const hindiMap = {
+    Propiconazole: "प्रोपिकोनाज़ोल",
+    Propiconazole25IC: "प्रोपिकोनाज़ोल 25आईसी",
+    Mancojeb75WP: "मैन्कोजेब 75WP",
+    Fipronil5SC: "फिप्रोनिल 5एससी",
+    Dimethate30IC: "डाइमेथेट 30आईसी",
+    Wheat: "गेहूं",
+    Maize: "मक्का",
+    Paddy: "धान",
+    Barley: "जौ",
+    JhulsaRog: "जुलसा रोग",
+    ValayPatti: "बले पत्ती",
+    PowderyMildew: "पाउडरी मिल्ड्यू",
+    TanaBhedak: "ताना भेदक",
+    DhaankaFudka: "धान का फुदका",
+    Chepa: "चेपा",
+    "500ml": "500 मिलीलीटर",
+    "100ml": "100 मिलीलीटर",
+    "100kg": "100 किलोग्राम",
+    "750Litre": "750 लीटर",
+    "500Litre": "500 लीटर",
+    "800Litre": "800 लीटर",
+    "100Litre": "100 लीटर",
+    spray: "छिड़कें",
+    on: "पर",
+    lower: "निचला",
+};
+
+      function getCurrentSelections() {
+        const selections = {};
+        document.querySelectorAll("#liveOutput select").forEach((select) => {
+          if (select.name) {
+            selections[select.name] = select.value;
+          }
+        });
+        return selections;
+      }
+
+      function toggleLanguage() {
+        isHindi = !isHindi;
+        const langBtn = document.getElementById("toggleLangBtn");
+        langBtn.innerText = isHindi
+          ? "🌐 Switch (English)"
+          : "🌐 Switch (Hindi)";
+        langBtn.classList.toggle("btn-outline-secondary");
+        langBtn.classList.toggle("btn-secondary");
+      }
+
+    function speakSentence() {
+    const outputContainer = document.getElementById("liveOutput");
+    let finalSentence = "";
+
+    console.log("Processing liveOutput child nodes:");
+    
+    // Recursive function to process all nodes
+    function processNodes(nodes) {
+        nodes.forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE) {
+                const text = node.textContent.trim();
+                if (text) {
+                    console.log(`Text node: "${text}"`);
+                    finalSentence += text + " ";
+                }
+            } else if (node.tagName === "SPAN") {
+                console.log("Entering span node");
+                processNodes(node.childNodes); // Recursively process span children
+            } else if (node.tagName === "SELECT") {
+                const selectedValue = node.value.trim();
+                if (selectedValue) {
+                    console.log(`Select node, selected value: "${selectedValue}"`);
+                    console.log(`Select options (for debugging): ${Array.from(node.options).map(opt => opt.value).join(", ")}`);
+                    finalSentence += selectedValue + " ";
+                } else {
+                    console.log("Select node, no selected value");
+                }
+            } else {
+                console.log(`Unexpected node type: ${node.nodeType}, tag: ${node.tagName || "none"}`);
+            }
+        });
+    }
+
+    // Start processing from the liveOutput children
+    processNodes(outputContainer.childNodes);
+
+    finalSentence = finalSentence.trim();
+    console.log(`English sentence constructed: "${finalSentence}"`);
+
+    const hindiOutput = document.getElementById("liveHindiOutput").innerText.trim();
+    console.log(`Hindi output (liveHindiOutput): "${hindiOutput}"`);
+
+    const textToSpeak = isHindi ? hindiOutput : finalSentence;
+    console.log(`Final text to speak (Hindi=${isHindi}): "${textToSpeak}"`);
+
+    if (!textToSpeak) {
+        console.log("No text to speak, exiting.");
+        return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    const voices = window.speechSynthesis.getVoices();
+    if (isHindi) {
+        utterance.lang = "hi-IN";
+        const hindiVoice = voices.find(voice => 
+            voice.lang === "hi-IN" || voice.name.toLowerCase().includes("hindi")
+        );
+        if (hindiVoice) {
+            console.log(`Using Hindi voice: ${hindiVoice.name}`);
+            utterance.voice = hindiVoice;
+        } else {
+            console.log("No Hindi voice found, using default.");
+        }
+    } else {
+        utterance.lang = "en-US";
+        const englishVoice = voices.find(voice => 
+            voice.name === "Google US English"
+        );
+        if (englishVoice) {
+            console.log(`Using English voice: ${englishVoice.name}`);
+            utterance.voice = englishVoice;
+        } else {
+            console.log("No Google US English voice found, using default.");
+        }
+    }
+    speechSynthesis.speak(utterance);
+}
+
+
+
+
+//   function updateHindiTranslation() {
+//     const outputContainer = document.getElementById("liveOutput");
+//     let englishSentence = "";
+//     let hindiSentence = "";
+
+//     // Force DOM update for select elements
+//     const selects = outputContainer.querySelectorAll("select");
+//     selects.forEach(select => {
+//         const intendedValue = select.value;
+//         Array.from(select.options).forEach(opt => {
+//             if (opt.value === intendedValue) {
+//                 opt.setAttribute("selected", "selected");
+//             } else {
+//                 opt.removeAttribute("selected");
+//             }
+//         });
+//         console.log(`Ensured select "${select.name}" value: "${select.value}"`);
+//     });
+
+//     // Recursive function to process all nodes
+//     function processNodes(nodes) {
+//         nodes.forEach(node => {
+//             if (node.nodeType === Node.TEXT_NODE) {
+//                 const text = node.textContent.trim();
+//                 if (text) {
+//                     console.log(`Text node: "${text}"`);
+//                     englishSentence += text + " ";
+//                     hindiSentence += (hindiMap[text] || text) + " ";
+//                 }
+//             } else if (node.tagName === "SPAN") {
+//                 console.log("Entering span node");
+//                 processNodes(node.childNodes);
+//             } else if (node.tagName === "SELECT") {
+//                 // Try node.value first
+//                 let selectedValue = node.value ? node.value.trim() : "";
+//                 // Fallback to selectedIndex
+//                 const selectedIndex = node.selectedIndex;
+//                 if (selectedIndex >= 0) {
+//                     selectedValue = node.options[selectedIndex]?.value.trim() || selectedValue;
+//                 }
+//                 console.log(`Select node, name: "${node.name}", selected value: "${selectedValue}", selectedIndex: ${selectedIndex}`);
+//                 if (selectedValue) {
+//                     englishSentence += selectedValue + " ";
+//                     hindiSentence += (hindiMap[selectedValue] || selectedValue) + " ";
+//                     // hindiSentence += (hindiMap[selectedValue.replace(/\s/g, '')] || selectedValue) + " ";
+
+//                 } else {
+//                     console.log(`No selected value for select node with name "${node.name}"`);
+//                     const firstOption = node.options[0]?.value || node.name;
+//                     englishSentence += firstOption + " ";
+//                     hindiSentence += (hindiMap[firstOption] || firstOption) + " ";
+//                     // hindiSentence += (hindiMap[text.replace(/\s/g, '')] || text) + " ";
+
+//                 }
+//             } else {
+//                 console.log(`Unexpected node type: ${node.nodeType}, tag: ${node.tagName || "none"}`);
+//             }
+//         });
+//     }
+
+//     console.log("Starting Hindi translation update...");
+//     processNodes(outputContainer.childNodes);
+
+//     englishSentence = englishSentence.trim();
+//     hindiSentence = hindiSentence.trim();
+//     console.log(`English sentence for translation: "${englishSentence}"`);
+//     console.log(`Hindi translation: "${hindiSentence}"`);
+//     document.getElementById("liveHindiOutput").innerText = hindiSentence;
+// }
+      
+
+
+      function startTranslation() {
+        fetch("/start-detection", { method: "POST" })
+          .then((response) => response.text())
+          .then((data) => console.log(data))
+          .catch((error) => console.error("Start error:", error));
+      }
+
+      // function clearLastWord() {
+      //   const outputElem = document.getElementById("liveOutput");
+      //   const sentence = outputElem.innerText.trim();
+      //   const words = sentence.split(" ");
+      //   words.pop();
+      //   outputElem.innerText = words.join(" ") || "Waiting for prediction...";
+      // }
+
+       function clearLastWord() {
+      fetch("/clear-last-word", { method: "POST" })
+          .then((response) => response.text())
+          .then((data) => {
+              console.log(data);
+              // Fetch the updated sentence immediately
+              fetchLatest();
+          })
+          .catch((error) => {
+              console.error("Clear last word error:", error);
+          });
+  } 
+
+
+      // function clearAll() {
+      //   document.getElementById("liveOutput").innerText =
+      //     "Waiting for prediction...";
+      //   document.getElementById("liveHindiOutput").innerText =
+      //     "Waiting for translation...";
+      // }
+
+    function clearAll() {
+      fetch("/clear-all", { method: "POST" })
+          .then((response) => response.text())
+          .then((data) => {
+              console.log(data);
+              // Fetch the updated (cleared) state immediately
+              fetchLatest();
+          })
+          .catch((error) => {
+              console.error("Clear all error:", error);
+          });
+  }      
+
+
+function convertSentenceToDropdowns(text, savedSelections = {}) {
+    const words = text.trim().split(/\s+/);
+    const container = document.createElement("span");
+    const processedWords = new Set(); // Track processed replaceable words
+
+    words.forEach((word) => {
+        const clean = word.toLowerCase();
+        if (replaceableWords.hasOwnProperty(clean) && !processedWords.has(clean)) {
+            const select = document.createElement("select");
+            select.classList.add("form-select", "d-inline-block", "mx-1");
+            select.style.width = "auto";
+            select.name = clean;
+            replaceableWords[clean].forEach((option) => {
+                const opt = document.createElement("option");
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+            });
+            if (savedSelections[clean]) {
+                select.value = savedSelections[clean];
+            } else {
+                select.value = replaceableWords[clean][0]; // Default to first option
+            }
+            console.log(`Created select for "${clean}", set value: "${select.value}"`);
+            select.addEventListener("change", updateHindiTranslation);
+            container.appendChild(select);
+            processedWords.add(clean);
+        } else if (!processedWords.has(clean)) {
+            const span = document.createElement("span");
+            span.textContent = word + " ";
+            container.appendChild(span);
+        }
+    });
+
+    return container;
+}
+
+      function fetchLatest() {
+        const savedSelections = getCurrentSelections();
+
+        fetch("/get-latest")
+          .then((res) => res.text())
+          .then((text) => {
+            const outputDiv = document.getElementById("liveOutput");
+            outputDiv.innerHTML = "";
+            outputDiv.appendChild(
+              convertSentenceToDropdowns(text || "Waiting...", savedSelections)
+            );
+          });
+
+        // fetch("/get-latest-hindi")
+        //   .then((res) => res.text())
+        //   .then((text) => {
+        //     document.getElementById("liveHindiOutput").innerText =
+        //       text || "Waiting...";
+        //   });
+        updateHindiTranslation();
+      }
+
+      setInterval(fetchLatest, 2000);
+
+    // ✅ Full sentence Hindi translation via API
+    
+    async function translateToHindi(sentence) {
+  const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(sentence)}&langpair=en|hi`);
+  const data = await response.json();
+  return data.responseData.translatedText || sentence;
+}
+
+async function updateHindiTranslation() {
+  const outputContainer = document.getElementById("liveOutput");
+  let englishSentence = "";
+
+  function processNodes(nodes) {
+    nodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent.trim();
+        if (text) englishSentence += text + " ";
+      } else if (node.tagName === "SPAN") {
+        processNodes(node.childNodes);
+      } else if (node.tagName === "SELECT") {
+        const selectedValue = node.value.trim();
+        if (selectedValue) englishSentence += selectedValue + " ";
+      }
+    });
+  }
+
+  processNodes(outputContainer.childNodes);
+  englishSentence = englishSentence.trim();
+  console.log("🔤 English sentence to translate:", englishSentence);
+
+  const translated = await translateToHindi(englishSentence);
+  document.getElementById("liveHindiOutput").innerText = translated;
+}
+
+
+    </script>
+    
+    
+
+
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="brand">MUTE MATE</div>
+      <p class="tagline">
+        "Bridging silence with technology — convert sign to speech."
+      </p>
+
+      <div class="row">
+        <div class="col-md-8">
+          <h3>Welcome Mate</h3>
+          <p class="text-muted">What would you like to do today?</p>
+
+          <div class="card mb-4">
+            <div class="card-body">
+              <div class="d-flex flex-wrap">
+                <div
+                  class="community-badge blue-badge btn"
+                  onclick="startTranslation()"
+                >
+                  Start Translation
+                </div>
+                <a
+                  href="https://www.youtube.com/watch?v=5PF6JXzYyUI"
+                  target="_blank"
+                  class="community-badge orange-badge btn"
+                  >Learn ISL</a
+                >
+                <a
+                  href="https://indiansignlanguage.org/"
+                  target="_blank"
+                  class="community-badge orange-badge btn"
+                  >ISL Dictionary</a
+                >
+                  <a
+                  href="{{ url_for('static', filename='howtouse.html') }}"
+                  target="_blank"
+                  class="community-badge orange-badge btn"> How To Use</a> 
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4">
+            <h5>🧠 Predicted Sentence (English):</h5>
+            <p id="liveOutput">Waiting for prediction...</p>
+
+            <h5>🌐 Hindi Translation:</h5>
+            <p id="liveHindiOutput">Waiting for translation...</p>
+
+            <div class="mt-3 d-flex gap-2 flex-wrap">
+              <button class="btn btn-success" onclick="speakSentence()">
+                🔊 Speak Sentence
+              </button>
+              <button
+                id="toggleLangBtn"
+                class="btn btn-secondary"
+                onclick="toggleLanguage()"
+              >
+                🌐 Switch (Hindi)
+              </button>
+              <button class="btn btn-warning" onclick="clearLastWord()">
+                🧹 Clear Last Word
+              </button>
+              <button class="btn btn-danger" onclick="clearAll()">
+                ❌ Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Knowledge Base of Crops -->
+        <div class="col-md-4 d-flex flex-column align-items-center">
+          <div class="w-100" style="margin-top: 60px">
+            <h5 class="text-center mb-3">📚 Knowledge Base of Crops</h5>
+            <div class="row row-cols-1 g-3 w-100 px-2">
+              <div class="col">
+                <div class="card h-100 shadow-sm">
+                  <a
+                    href="{{ url_for('static', filename='Wheat.jpg') }}"
+                    target="_blank"
+                  >
+                    <img
+                      src="{{ url_for('static', filename='Wheat1.jpg') }}"
+                      class="card-img-top"
+                      alt="Wheat"
+                    />
+                  </a>
+
+                  <div class="card-body text-center p-2">
+                    <small class="card-title">Wheat</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="card h-100 shadow-sm">
+                  <a
+                    href="{{ url_for('static', filename='Paddy.jpg') }}"
+                    target="_blank"
+                  >
+                    <img
+                      src="{{ url_for('static', filename='Paddy1.jpg') }}"
+                      class="card-img-top"
+                      alt="Paddy"
+                    />
+                  </a>
+
+                  <div class="card-body text-center p-2">
+                    <small class="card-title">Paddy</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="card h-100 shadow-sm">
+                  <a
+                    href="{{ url_for('static', filename='Maize.jpg') }}"
+                    target="_blank"
+                  >
+                    <img
+                      src="{{ url_for('static', filename='Maize1.jpg') }}"
+                      class="card-img-top"
+                      alt="Maize"
+                    />
+                  </a>
+
+                  <div class="card-body text-center p-2">
+                    <small class="card-title">Maize</small>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col">
+                <div class="card h-100 shadow-sm">
+                  <a
+                    href="{{ url_for('static', filename='Barley.jpg') }}"
+                    target="_blank"
+                  >
+                    <img
+                      src="{{ url_for('static', filename='Barley1.jpg') }}"
+                      class="card-img-top"
+                      alt="Barley"
+                    />
+                  </a>
+
+                  <div class="card-body text-center p-2">
+                    <small class="card-title">Barley</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
